@@ -136,7 +136,23 @@ const FunnelContext = createContext<{
 export function FunnelProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(funnelReducer, initialState);
 
-  // Sync metrics from Firebase
+  // Load metrics from Firebase on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const metricsRef = ref(database, 'metrics');
+    get(metricsRef).then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        dispatch({ 
+          type: 'SYNC_METRICS', 
+          metrics: data 
+        } as FunnelAction);
+      }
+    });
+  }, []);
+
+  // Sync metrics from Firebase in real-time
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
