@@ -20,9 +20,9 @@ export default function StatsDashboard({ metrics }: StatsDashboardProps) {
 
   const stats = [
     { label: 'Iniciaron', value: metrics.started, color: 'from-cyan-500 to-blue-500' },
-    { label: 'En TOFU', value: metrics.inTofu, color: 'from-green-500 to-emerald-500' },
-    { label: 'En MOFU', value: metrics.inMofu, color: 'from-yellow-500 to-orange-500' },
-    { label: 'En BOFU', value: metrics.inBofu, color: 'from-purple-500 to-pink-500' },
+    { label: 'Pasaron TOFU', value: metrics.inTofu, color: 'from-green-500 to-emerald-500' },
+    { label: 'Pasaron MOFU', value: metrics.inMofu, color: 'from-yellow-500 to-orange-500' },
+    { label: 'Pasaron BOFU', value: metrics.inBofu, color: 'from-purple-500 to-pink-500' },
     { label: 'Conversiones', value: metrics.conversions, color: 'from-emerald-500 to-green-400' },
     { label: 'Abandono TOFU', value: metrics.tofuAbandonments, color: 'from-red-500 to-rose-500' },
     { label: 'Abandono MOFU', value: metrics.mofuAbandonments, color: 'from-orange-500 to-red-500' },
