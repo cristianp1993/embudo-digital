@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
-import { ref, onValue, set, update } from 'firebase/database';
+import { ref, onValue, runTransaction, get } from 'firebase/database';
 import { database } from '../lib/firebase';
 
 type FunnelStage = 'hero' | 'tofu' | 'mofu' | 'bofu' | 'conversion' | 'abandonment';
@@ -73,7 +73,7 @@ function funnelReducer(state: FunnelState, action: FunnelAction): FunnelState {
         currentStage: 'mofu',
         metrics: {
           ...state.metrics,
-          inTofu: state.metrics.inTofu - 1,
+          inTofu: Math.max(0, state.metrics.inTofu - 1),
           inMofu: state.metrics.inMofu + 1,
         },
         userPath: [...state.userPath, 'TOFU'],
@@ -84,7 +84,7 @@ function funnelReducer(state: FunnelState, action: FunnelAction): FunnelState {
         currentStage: 'bofu',
         metrics: {
           ...state.metrics,
-          inMofu: state.metrics.inMofu - 1,
+          inMofu: Math.max(0, state.metrics.inMofu - 1),
           inBofu: state.metrics.inBofu + 1,
         },
         userPath: [...state.userPath, 'MOFU'],
@@ -95,7 +95,7 @@ function funnelReducer(state: FunnelState, action: FunnelAction): FunnelState {
         currentStage: 'conversion',
         metrics: {
           ...state.metrics,
-          inBofu: state.metrics.inBofu - 1,
+          inBofu: Math.max(0, state.metrics.inBofu - 1),
           conversions: state.metrics.conversions + 1,
         },
         userPath: [...state.userPath, 'BOFU', 'Conversión'],
@@ -103,13 +103,13 @@ function funnelReducer(state: FunnelState, action: FunnelAction): FunnelState {
     case 'ABANDON':
       const updatedMetrics = { ...state.metrics };
       if (action.stage === 'tofu') {
-        updatedMetrics.inTofu = state.metrics.inTofu - 1;
+        updatedMetrics.inTofu = Math.max(0, state.metrics.inTofu - 1);
         updatedMetrics.tofuAbandonments = state.metrics.tofuAbandonments + 1;
       } else if (action.stage === 'mofu') {
-        updatedMetrics.inMofu = state.metrics.inMofu - 1;
+        updatedMetrics.inMofu = Math.max(0, state.metrics.inMofu - 1);
         updatedMetrics.mofuAbandonments = state.metrics.mofuAbandonments + 1;
       } else if (action.stage === 'bofu') {
-        updatedMetrics.inBofu = state.metrics.inBofu - 1;
+        updatedMetrics.inBofu = Math.max(0, state.metrics.inBofu - 1);
         updatedMetrics.bofuAbandonments = state.metrics.bofuAbandonments + 1;
       }
       return {
@@ -160,12 +160,17 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  // Sync metrics to Firebase when they change
+  // Update Firebase metrics when local state changes using transactions
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
     const metricsRef = ref(database, 'metrics');
-    set(metricsRef, state.metrics);
+    runTransaction(metricsRef, (currentMetrics) => {
+      if (!currentMetrics) {
+        return state.metrics;
+      }
+      return state.metrics;
+    });
   }, [state.metrics]);
 
   return (
