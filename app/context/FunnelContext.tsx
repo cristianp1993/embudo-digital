@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
-import { ref, onValue, runTransaction, get } from 'firebase/database';
+import { ref, onValue, runTransaction, get, set } from 'firebase/database';
 import { database } from '../lib/firebase';
 
 type FunnelStage = 'hero' | 'tofu' | 'mofu' | 'bofu' | 'conversion' | 'abandonment';
@@ -31,7 +31,8 @@ type FunnelAction =
   | { type: 'ABANDON'; stage: FunnelStage }
   | { type: 'RESTART' }
   | { type: 'ADD_PATH_STEP'; step: string }
-  | { type: 'SYNC_METRICS'; metrics: FunnelState['metrics'] };
+  | { type: 'SYNC_METRICS'; metrics: FunnelState['metrics'] }
+  | { type: 'RESET_METRICS' };
 
 const initialState: FunnelState = {
   currentStage: 'hero',
@@ -123,6 +124,20 @@ function funnelReducer(state: FunnelState, action: FunnelAction): FunnelState {
         ...state,
         userPath: [...state.userPath, action.step],
       };
+    case 'RESET_METRICS':
+      return {
+        ...state,
+        metrics: {
+          started: 0,
+          inTofu: 0,
+          inMofu: 0,
+          inBofu: 0,
+          conversions: 0,
+          tofuAbandonments: 0,
+          mofuAbandonments: 0,
+          bofuAbandonments: 0,
+        },
+      };
     default:
       return state;
   }
@@ -201,4 +216,19 @@ export function useFunnel() {
     throw new Error('useFunnel must be used within a FunnelProvider');
   }
   return context;
+}
+
+export function resetFirebaseMetrics() {
+  const metricsRef = ref(database, 'metrics');
+  const resetMetrics = {
+    started: 0,
+    inTofu: 0,
+    inMofu: 0,
+    inBofu: 0,
+    conversions: 0,
+    tofuAbandonments: 0,
+    mofuAbandonments: 0,
+    bofuAbandonments: 0,
+  };
+  set(metricsRef, resetMetrics);
 }

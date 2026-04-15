@@ -1,12 +1,20 @@
 'use client';
 
 import React from 'react';
+import { resetFirebaseMetrics } from '../context/FunnelContext';
 
 interface HeroProps {
   onStart: () => void;
 }
 
 export default function Hero({ onStart }: HeroProps) {
+  const handleReset = () => {
+    if (confirm('¿Estás seguro de reiniciar todas las métricas? Esta acción no se puede deshacer.')) {
+      resetFirebaseMetrics();
+      window.location.reload();
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 animate-fade-in">
       <div className="max-w-4xl text-center space-y-8">
@@ -38,6 +46,15 @@ export default function Hero({ onStart }: HeroProps) {
           </p>
         </div>
       </div>
+      
+      {/* Hidden reset button - only for admin */}
+      <button
+        onClick={handleReset}
+        className="fixed bottom-2 left-2 text-[10px] text-gray-600 hover:text-gray-400 opacity-30 hover:opacity-100 transition-opacity"
+        title="Reiniciar métricas (solo admin)"
+      >
+        🔄
+      </button>
     </div>
   );
 }
