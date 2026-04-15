@@ -32,9 +32,8 @@ export default function Hero({ onStart }: HeroProps) {
           Entrar al experimento
         </button>
         
-        <div className="mt-12 text-gray-400 text-sm animate-slide-up" style={{ animationDelay: '0.6s' }}>
-          <p>💡 Este es un experimento en vivo. Todo sucede en tu navegador.</p>
-          <p className="text-xs text-gray-500 mt-2">
+        <div className="mt-12 text-gray-400 text-lg font-semibold animate-slide-up" style={{ animationDelay: '0.6s' }}>
+          <p>
             Leonardo Maje Rios - Cristian David Piedrahita - Sergio Velazquez
           </p>
         </div>
