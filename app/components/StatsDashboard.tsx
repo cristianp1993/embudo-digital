@@ -28,18 +28,18 @@ export default function StatsDashboard({ metrics }: StatsDashboardProps) {
   ];
 
   return (
-    <div className="fixed top-4 right-4 z-50 bg-black/80 backdrop-blur-lg rounded-2xl p-4 border border-gray-700 shadow-2xl">
-      <h3 className="text-white font-bold text-sm mb-3 text-center">📊 Métricas en Vivo</h3>
-      <div className="grid grid-cols-2 gap-2">
+    <div className="fixed top-4 right-4 z-50 bg-black/80 backdrop-blur-lg rounded-2xl p-3 border border-gray-700 shadow-2xl max-w-[200px] md:max-w-none">
+      <h3 className="text-white font-bold text-xs mb-2 text-center">📊 Métricas</h3>
+      <div className="grid grid-cols-2 gap-1.5">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-700"
+            className="bg-gray-900/50 rounded-lg p-1.5 text-center border border-gray-700"
           >
-            <div className={`text-lg font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+            <div className={`text-sm md:text-lg font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
               {stat.value}
             </div>
-            <div className="text-xs text-gray-400 mt-1">{stat.label}</div>
+            <div className="text-[10px] md:text-xs text-gray-400 mt-0.5">{stat.label}</div>
           </div>
         ))}
       </div>
