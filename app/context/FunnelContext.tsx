@@ -135,6 +135,7 @@ const FunnelContext = createContext<{
 
 export function FunnelProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(funnelReducer, initialState);
+  const [isSyncing, setIsSyncing] = React.useState(false);
 
   // Load metrics from Firebase on mount
   useEffect(() => {
@@ -144,10 +145,12 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
     get(metricsRef).then((snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
+        setIsSyncing(true);
         dispatch({ 
           type: 'SYNC_METRICS', 
           metrics: data 
         } as FunnelAction);
+        setTimeout(() => setIsSyncing(false), 100);
       }
     });
   }, []);
@@ -160,19 +163,21 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onValue(metricsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
+        setIsSyncing(true);
         dispatch({ 
           type: 'SYNC_METRICS', 
           metrics: data 
         } as FunnelAction);
+        setTimeout(() => setIsSyncing(false), 100);
       }
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Update Firebase metrics when local state changes using transactions
+  // Update Firebase metrics when local state changes using transactions (only on user actions)
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || isSyncing) return;
     
     const metricsRef = ref(database, 'metrics');
     runTransaction(metricsRef, (currentMetrics) => {
@@ -181,7 +186,7 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
       }
       return state.metrics;
     });
-  }, [state.metrics]);
+  }, [state.metrics, isSyncing]);
 
   return (
     <FunnelContext.Provider value={{ state, dispatch }}>
